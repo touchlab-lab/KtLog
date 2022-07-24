@@ -9,6 +9,10 @@ make one logging library or another more appealing. For apps you write, there's 
 logging library, but for library authors, picking a specific logging library, or as is often the case, writing their own, 
 means a lot of incompatible configuration, if it's possible to configure library logging at all.
 
+## Disclaimer
+
+This is not an active project. It is a design proposal. You should definitely not try to use it.
+
 ## Design
 
 It is mostly from SLF4J, but some from kotlin-logging and just general logging library experience. The main interface is
