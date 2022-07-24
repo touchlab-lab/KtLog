@@ -8,18 +8,9 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package co.touchlab.kermit
-
-import kotlin.native.concurrent.AtomicReference
-
-internal actual val isStrictModel: Boolean = Platform.memoryModel == MemoryModel.STRICT
+package co.touchlab.ktlog
 
 internal actual object ProviderConfig {
-    private val providerAtom = AtomicReference<LoggerFactoryProvider>(EmptyLoggerFactoryProvider)
-
-    actual var provider: LoggerFactoryProvider
-        get() = providerAtom.value
-        set(value) {
-            providerAtom.value = value
-        }
+    @Volatile
+    actual var provider: LoggerFactoryProvider = EmptyLoggerFactoryProvider
 }

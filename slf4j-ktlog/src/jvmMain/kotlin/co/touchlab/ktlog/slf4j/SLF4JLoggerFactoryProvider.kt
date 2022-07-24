@@ -8,11 +8,11 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package co.touchlab.kermit
+package co.touchlab.ktlog.slf4j
 
-internal actual val isStrictModel: Boolean = false
+import co.touchlab.ktlog.Logger
+import co.touchlab.ktlog.LoggerFactoryProvider
 
-internal actual object ProviderConfig {
-    @Volatile
-    actual var provider: LoggerFactoryProvider = EmptyLoggerFactoryProvider
+class SLF4JLoggerFactoryProvider : LoggerFactoryProvider {
+    override fun getLogger(name: String): Logger = SLF4JLogger(name)
 }

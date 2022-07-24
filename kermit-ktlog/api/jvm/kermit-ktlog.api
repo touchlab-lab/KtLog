@@ -1,0 +1,16 @@
+public final class co/touchlab/ktlog/kermit/KermitLogger : co/touchlab/ktlog/AbstractLogger {
+	public fun <init> (Ljava/lang/String;Lco/touchlab/kermit/Logger;)V
+	public fun isEnabledForLevel (Lco/touchlab/ktlog/Level;Ljava/lang/String;)Z
+	public fun log (Lco/touchlab/ktlog/Level;Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;)V
+}
+
+public final class co/touchlab/ktlog/kermit/KermitLoggerFactoryProvider : co/touchlab/ktlog/LoggerFactoryProvider {
+	public fun <init> (Lco/touchlab/kermit/LoggerConfig;)V
+	public fun getLogger (Ljava/lang/String;)Lco/touchlab/ktlog/Logger;
+}
+
+public final class co/touchlab/ktlog/kermit/KermitLoggerFactoryProviderKt {
+	public static final fun defaultKermitProvider ([Lco/touchlab/kermit/LogWriter;)Lco/touchlab/ktlog/kermit/KermitLoggerFactoryProvider;
+	public static synthetic fun defaultKermitProvider$default ([Lco/touchlab/kermit/LogWriter;ILjava/lang/Object;)Lco/touchlab/ktlog/kermit/KermitLoggerFactoryProvider;
+}
+

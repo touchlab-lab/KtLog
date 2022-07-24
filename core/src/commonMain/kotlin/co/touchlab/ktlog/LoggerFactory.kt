@@ -8,18 +8,22 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package co.touchlab.kermit
+@file:Suppress("VARIABLE_IN_SINGLETON_WITHOUT_THREAD_LOCAL")
 
-interface LoggerFactoryProvider {
-    fun getLogger(name: String): Logger
-}
+package co.touchlab.ktlog
 
-internal object EmptyLoggerFactoryProvider : LoggerFactoryProvider {
-    override fun getLogger(name: String): Logger = EmptyLogger
-}
+import kotlin.reflect.KClass
 
-internal object EmptyLogger : AbstractLogger("EmptyLogger") {
-    override fun log(level: Level, marker: Marker?, throwable: Throwable?, message: String) {
-        //Nothing
+object LoggerFactory {
+    fun setLoggingFactoryProvider(provider: LoggerFactoryProvider) {
+        ProviderConfig.provider = provider
     }
+
+    fun getLogger(name: String): Logger = ProviderConfig.provider.getLogger(name)
+
+    fun getLogger(clazz: KClass<*>): Logger = ProviderConfig.provider.getLogger(clazz.simpleName ?: "(UnknownType)")
+}
+
+internal expect object ProviderConfig {
+    var provider: LoggerFactoryProvider
 }

@@ -1,265 +1,42 @@
-# Kermit <sub>the log</sub>
+# KtLog
 
-Kermit is a Kotlin Multiplatform logging utility with composable log outputs. Out of the box, the library defaults to platform-specific loggers such as Logcat and OSLog, but is easy to extend and configure.
+This is a proposed design and implementation for a Kotlin Multiplatform logging facade. It takes direct inspiration
+from [SLF4J](https://www.slf4j.org/) and somewhat from [kotlin-logging](https://github.com/MicroUtils/kotlin-logging).
 
-> Check out [KaMP Kit](https://github.com/touchlab/KaMPKit) to get started developing for Kotlin Multiplatform
+The goal is to provide a simple logging API that libraries can log to, and an app consuming those libraries can 
+externally configure logging in a central way. The design focus is less on trying to add many features that might 
+make one logging library or another more appealing. For apps you write, there's little downside to picking a specific
+logging library, but for library authors, picking a specific logging library, or as is often the case, writing their own, 
+means a lot of incompatible configuration, if it's possible to configure library logging at all.
 
+## Design
 
-> ## Touchlab's Hiring!
->
-> We're looking for a Mobile Developer, with Android/Kotlin experience, who is eager to dive into Kotlin Multiplatform Mobile (KMM) development. Come join the remote-first team putting KMM in production. [More info here](https://go.touchlab.co/careers-gh).
+It is mostly from SLF4J, but some from kotlin-logging and just general logging library experience. The main interface is
+`Logger`. Rather than having several methods defined for each logging level, I decided to rely on default parameter values
+and limit each level to 2 methods: one with a `String` argument and one with a function that returns a string (`() -> String`).
 
+Doing it this way reduces the number of methods, but also forces a certain order on the parameters, which some users of 
+Kermit object to (we do something similar in Kermit). That can, of course, be changed, but I'd like to start minimal and
+expand if needed.
 
-## Most Users Read This
+kotlin-logging has extra methods on it's `KLogger`: `enter`, `exit`, `throwing`, `catching`. These feel like convenience methods rather than core logging capabilities, at least in the context of Kotlin-logging's integrations. If there is a reason for them, can discuss.
 
-If you don't care about the philosophy of logging, custom configurations, and especially if you're writing for native mobile (KMM), 
-then you should just do the following.
+Like SLF4J, there's one `Logger` and `LoggerFactory` at a time. Unlike SLF4J, the library does not attempt to auto-configure from the classpath. That approach likely won't work in native contexts, so for now the `LoggerFactory` needs to have it's provider set manually. That structure is called `LoggerFactoryProvider`, which is not my favorite name, but `LoggerFactoryFactory` seemed worse, and I'm not personally a big fan of "I" prefixes for interfaces. Anyway, that's the name currently.
 
-### Add Dependency
-
-The Kermit dependency should be added to your `commonMain` source set in your Kotlin Multiplatform module.
-
-```kotlin
-commonMain {
-    dependencies {
-        implementation(kotlin("stdlib-common"))
-        implementation("co.touchlab:kermit:x.y.z") //Add latest version
-    }
-}
-```
-
-### Log
+To set up, run this:
 
 ```kotlin
-Logger.i { "Hello World" }
+LoggerFactory.setLoggingFactoryProvider(defaultKermitProvider())
 ```
 
-The rest of the docs explain more detailed options, but at this point you should be able to log from common 
-code.
+In this case it is using Kermit as the actual logger (see the `kermit-ktlog` module).
 
-### Defaults
+For the JVM side, I assume we could write some kind of auto classpath config if desired.
 
-By default, Kermit adds one Logger instance. The choice of default logger is basically the best option for local development. On Android, it is Logcat, for JS it just logs to console. On iOS, the logs go to OSLog but also get some visual style to help hightlight the severity.
+### Marker
 
-Production deployments may want a different configuration.
+Marker is one of the more difficult issues here. SLF4J supports Marker with refecences to other Marker instances, but Kotlin-logging only supports a simple String wrapped in a Marker class (for non-JVM platforms), and for the all of the loggers I've seen, they support String tagging or no tagging, certainly not Markers with references to others. In light of that, if the `Marker` instance on non-JVM platforms is just a wrapper around a string, it seems like a pointless allocation and extra boilerplate code, rather than just using a string (maybe an inline/value class https://kotlinlang.org/docs/inline-classes.html, but I don't think that would work with expect/actual to the JVM Marker). So, for now `Marker` is just a typealias to String. To discuss, but it just seemed like it wasn't necessary.
 
-## Basic Concepts
+### Relation to SLF4J
 
-The basic components you'll need to be aware of are `Logger`, `LogWriter`, and `Severity`.
-
-### Logger
-
-The `Logger` takes log calls from your code and dispatches them to `LogWriter` instances. There are different methods
-on `Logger` corresponding to different log `Severity` levels. In order of least to most severe: v(), d(), i(), w(), e(),
-and a().
-
-You configure the `Logger`, then call log methods on it. That's the basic interaction with Kermit.
-
-### LogWriter
-
-A `LogWriter` actually sends log messages to different log outputs. You add `LogWriter` instances to a `Logger`.
-
-Kermit includes a `CommonWriter` and various platform-specific `LogWriter` instances. Through other modules, Kermit
-also allows logging crash info to Crashlytics and Bugsnag.
-
-For more info on included `LogWriter` types, and to create your own, see [LOG_WRITER](docs/LOG_WRITER.md)
-
-### Severity
-
-Severity levels follow common logging library patterns and should be generally familiar. You can control what will
-and won't get logged based on severity. So, say you only want to log `Warn` and up, you can tell the logger. We'll
-cover that more in [Configuration](#Configuration)
-
-## Usage
-
-You call logging methods on a `Logger` instance. There are methods for each severity level. Each call takes an optional 
-`Throwable` instance, and a lambda which returns a string. The Logger will only evaluate
-the lambda if there is an enabled log writer that will write.
-
-In its most basic form, logging looks like this:
-
-```kotlin
-Logger.i { "Hello World" }
-```
-
-If you are not familiar with the curly bracket syntax, that is a [trailing lambda with special syntax](https://kotlinlang.org/docs/lambdas.html#passing-trailing-lambdas).
-Again, that will not be evaluated if no log writer needs it. String creation can be relatively costly if you don't need it,
-so Kermit will avoid creating the string if it is not being logged.
-
-The call above is on the global `Logger` instance. You can make all of your logging on the global instance, or have local instances that are injected into your classes. We tend to use the latter, which accounts for some of Kermit's design decisions, but besides some small amount of performance boost, the choice between them is really down to personal preference.
-
-### A Note About Tags
-
-Tags are a complicating factor in the design. Currently tags are part of the Logger instance because we found the tag param to be kind of verbose and Android-specific. We also wanted to keep the number of api methods to a minimum because Swift (and others) can't handle default parameters, so each log statement requires all parameters in the call. However, if just using the global logger instance, having no tag parameter is a problem. We may be adding tag as a param but only for the global instance. Stay tuned (or comment in discussions).
-
-### Local
-
-Local usage is basically the same in concept. You simply call the same method on a local instance.
-
-```kotlin
-val logger = Logger.withTag("MyLogger")
-logger.i { "Hello World" }
-```
-
-You can supply a different tag for the logger through local instances. This is more
-meaningful in an Android context. As mentioned, there's also a slight performance advantage to local.
-See [PERFORMANCE](docs/PERFORMANCE.md) for more info.
-
-## Configuration
-
-You can configure two parameters for LoggerConfig: `LogWriter` instances and minimum severity.
-
-### LogWriter Instances
-
-By default, only the `CommonWriter` is enabled. You can swap other `LogWriter` instances. The most common scenario
-is platform-default. There is a convenience function for that.
-
-```kotlin
-Logger.setLogWriters(platformLogWriter())
-```
-
-For more fine-grained control, you can supply log writers individually. See [LOG_WRITER](docs/LOG_WRITER.md).
-
-### Default Tag
-
-The default tag is the tag used while logging if you have no changed a Logger-specific tag. By default, it is "Kermit".
-You can change the default global tag with:
-
-```kotlin
-Logger.setDefaultTag("MyTag")
-```
-
-### Minimum Severity
-
-To avoid logging lower level statements, you can set a minimum severity. This will prevent evaluating log 
-message lambdas for those severities. To configure the global minimum severity, add:
-
-```kotlin
-Logger.setMinSeverity(Severity.Warn)
-```
-
-You may only want to turn this on in production, or by some other flag. Be careful, as it'll be easy
-to turn this on and forget, then not see debug log statements. For that reason, it is probably best left
-alone unless in a production situation.
-
-### Local Configuration
-
-The configuration above is on the global instance. For a number of reason, you may want a local `Logger` instead.
-We provide a static config instance for situations where you con't need mutable config or global logging.
-
-```kotlin
-val logger = Logger(StaticConfig(minSeverity = Severity.Warn, loggerList = listOf(CommonWriter())))
-logger.i { "Hello Local!" }
-```
-
-See [PERFORMANCE](docs/PERFORMANCE.md) for more info.
-
-## Tags
-
-Each `Logger` instance has a tag associated with it, which is initialized by the default tag if none is provided. Tags
-help categorize log statements. This feature is largely derived from Android, but can be useful in other contexts.
-
-Tags are passed to `LogWriter` implementations which can decide how to use them (or ignore them). For example, `LogcatWriter` on Android
-passes it along to Logcat's tag field.
-
-You can override the global default tag [(see Default Tag)](#Default-Tag).
-
-To have a tag other than default, create a new `Logger` instance with:
-
-```kotlin
-val newTagLogger = logger.withTag("newTag")
-```
-
-## iOS
-
-Generally speaking, Kermit's SDK was designed to be called from Kotlin, but you can initialize and call logging from any
-platform that has interop with Kotlin. For iOS and Swift-specific considerations, see [IOS_CONSIDERATIONS](docs/IOS_CONSIDERATIONS.md)
-
-## Samples
-
-There are multiple sample apps showing various configurations.
-
-## Crash Reporting
-
-Kermit includes crash reporting implementations for Crashlytics and Bugsnag. These will write breadcrumb statements to
-those crash reporting tools, and can be triggered to report unhandled crash reports when there's an uncaught Kotlin
-exception.
-
-> Read our blog post about Kermit and Crashlytics: https://touchlab.co/kermit-and-crashlytics/
-
-Crashlytics [docs](kermit-crashlytics/README.md) and [sample](samples/sample-crashlytics).
-
-Bugsnag [docs](kermit-bugsnag/README.md) and [sample](samples/sample-bugsnag).
-
-### Sentry
-
-Sentry support exists but is experimental. We've had some reports of issues, so we may pull support until there are people available to look at it. Other users have it in production, so just be aware and verify that it works in your app.
-
-## Testing
-
-Kermit includes a test dependency, intended for use when testing application code that interacts with Kermit APIs but
-doesn't want to write to actual logs. This includes a `TestLogWriter` which holds the string outputs of log statements,
-and has APIs for asserting on what logs are present.
-
-## Kermit Chisel
-
-For some situations, disabling logging is desirable. For example, when building release versions of apps. You can
-disable logging by defining minSeverity on the logging config, but you can also run a compiler plugin and strip out
-logging calls entirely.
-
-To run the log strip plugin, add the classpath to your buildscript:
-
-```kotlin
-buildscript {
-    dependencies {
-        classpath("co.touchlab:kermit-gradle-plugin:x.y.z")
-    }
-}
-```
-
-Then apply the plugin in your gradle file:
-
-```kotlin
-plugins {
-    id("co.touchlab.kermit")
-    //etc
-}
-```
-
-By default, running the plugin does nothing. You should configure the plugin with a severity:
-
-```kotlin
-kermit {
-    stripBelow = StripSeverity.Warn
-}
-```
-
-Any log call below the configured severity will be removed. So, if you pass `Warn`, warn, error, and assert calls remain
-but info and below are removed. There are some special values: `None` and `All`. `None` is default (removes nothing). `All` removes
-all logging calls.
-
-See the "sample-chisel" example. You can change the `stripBelow` and test various logging levels in the app.
-
-In our production applications, we generally send error and warning level throwables to remote crash reporters, info level
-is tracked in "breadcrumbs" for remote crash reporters. Debug and verbose are local-only. Sticking to that pattern, you could
-configure your build as follows:
-
-```kotlin
-val releaseBuild: String by project
-
-kermit {
-    if(releaseBuild.toBoolean()) {
-        stripBelow = StripSeverity.Info
-    }
-}
-```
-
-Add `releaseBuild=false` to `gradle.properties`, then pass in an override when building a release version.
-
-Note: Chisel is new and configuration is likely to change in the near future.
-
-## Primary Maintainer
-
-[Michael Friend](https://github.com/mrf7/)
-
-![Image of Michael](https://avatars.githubusercontent.com/u/16885048?s=140&v=4)
+Kotlin-logging explicitly integrates with SLF4J on the jvm side, which may make that config easier, but I felt like it forces the design a bit, plus I don't think you'd want that by default on Android. So, with the current design, integrating with SLF4J needs to be more explicit, but can be tweaked to be easier.

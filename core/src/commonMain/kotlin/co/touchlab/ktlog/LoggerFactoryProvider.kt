@@ -8,12 +8,20 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package co.touchlab.kermit
+package co.touchlab.ktlog
 
-import kotlin.jvm.Volatile
+interface LoggerFactoryProvider {
+    fun getLogger(name: String): Logger
+}
 
-internal actual val isStrictModel: Boolean = false
+internal object EmptyLoggerFactoryProvider : LoggerFactoryProvider {
+    override fun getLogger(name: String): Logger = EmptyLogger
+}
 
-internal actual object ProviderConfig {
-    actual var provider: LoggerFactoryProvider = EmptyLoggerFactoryProvider
+internal object EmptyLogger : AbstractLogger("EmptyLogger") {
+    override fun log(level: Level, marker: Marker?, throwable: Throwable?, message: String) {
+        //Nothing
+    }
+
+    override fun isEnabledForLevel(level: Level, marker: Marker?): Boolean = false
 }

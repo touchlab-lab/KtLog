@@ -12,6 +12,8 @@
  */
 
 include(":core")
+include(":kermit-ktlog")
+include(":slf4j-ktlog")
 //include(":test")
 
 pluginManagement {
