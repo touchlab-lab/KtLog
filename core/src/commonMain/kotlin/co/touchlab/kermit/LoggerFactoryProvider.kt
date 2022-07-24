@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Touchlab
+ * Copyright (c) 2022 Touchlab
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -10,5 +10,16 @@
 
 package co.touchlab.kermit
 
-@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
-annotation class ExperimentalKermitApi()
+interface LoggerFactoryProvider {
+    fun getLogger(name: String): Logger
+}
+
+internal object EmptyLoggerFactoryProvider : LoggerFactoryProvider {
+    override fun getLogger(name: String): Logger = EmptyLogger
+}
+
+internal object EmptyLogger : AbstractLogger("EmptyLogger") {
+    override fun log(level: Level, marker: Marker?, throwable: Throwable?, message: String) {
+        //Nothing
+    }
+}

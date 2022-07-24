@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Touchlab
+ * Copyright (c) 2022 Touchlab
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -10,7 +10,16 @@
 
 package co.touchlab.kermit
 
-internal class JsMutableLoggerConfig(logWriters: List<LogWriter>) : MutableLoggerConfig {
-    override var minSeverity: Severity = DEFAULT_MIN_SEVERITY
-    override var logWriterList: List<LogWriter> = logWriters
+import kotlin.native.concurrent.AtomicReference
+
+internal actual val isStrictModel: Boolean = Platform.memoryModel == MemoryModel.STRICT
+
+internal actual object ProviderConfig {
+    private val providerAtom = AtomicReference<LoggerFactoryProvider>(EmptyLoggerFactoryProvider)
+
+    actual var provider: LoggerFactoryProvider
+        get() = providerAtom.value
+        set(value) {
+            providerAtom.value = value
+        }
 }

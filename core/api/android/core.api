@@ -1,0 +1,110 @@
+public abstract class co/touchlab/kermit/AbstractLogger : co/touchlab/kermit/Logger {
+	public fun <init> (Ljava/lang/String;)V
+	public fun debug (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun debug (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun error (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun error (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun getName ()Ljava/lang/String;
+	public fun info (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun info (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun isDebugEnabled (Ljava/lang/String;)Z
+	public fun isEnabledForLevel (Lco/touchlab/kermit/Level;Ljava/lang/String;)Z
+	public fun isErrorEnabled (Ljava/lang/String;)Z
+	public fun isInfoEnabled (Ljava/lang/String;)Z
+	public fun isTraceEnabled (Ljava/lang/String;)Z
+	public fun isWarnEnabled (Ljava/lang/String;)Z
+	public abstract fun log (Lco/touchlab/kermit/Level;Ljava/lang/String;Ljava/lang/Throwable;Ljava/lang/String;)V
+	public fun trace (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun trace (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public fun warn (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun warn (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class co/touchlab/kermit/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class co/touchlab/kermit/EventConstants {
+	public static final field INSTANCE Lco/touchlab/kermit/EventConstants;
+	public final fun getDEBUG_INT ()I
+	public final fun getERROR_INT ()I
+	public final fun getINFO_INT ()I
+	public final fun getTRACE_INT ()I
+	public final fun getWARN_INT ()I
+}
+
+public final class co/touchlab/kermit/Level : java/lang/Enum {
+	public static final field Companion Lco/touchlab/kermit/Level$Companion;
+	public static final field DEBUG Lco/touchlab/kermit/Level;
+	public static final field ERROR Lco/touchlab/kermit/Level;
+	public static final field INFO Lco/touchlab/kermit/Level;
+	public static final field TRACE Lco/touchlab/kermit/Level;
+	public static final field WARN Lco/touchlab/kermit/Level;
+	public final fun toInt ()I
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lco/touchlab/kermit/Level;
+	public static fun values ()[Lco/touchlab/kermit/Level;
+}
+
+public final class co/touchlab/kermit/Level$Companion {
+	public final fun intToLevel (I)Lco/touchlab/kermit/Level;
+}
+
+public abstract interface class co/touchlab/kermit/Logger {
+	public abstract fun debug (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun debug (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun error (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun error (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun info (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun info (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun isDebugEnabled (Ljava/lang/String;)Z
+	public abstract fun isEnabledForLevel (Lco/touchlab/kermit/Level;Ljava/lang/String;)Z
+	public abstract fun isErrorEnabled (Ljava/lang/String;)Z
+	public abstract fun isInfoEnabled (Ljava/lang/String;)Z
+	public abstract fun isTraceEnabled (Ljava/lang/String;)Z
+	public abstract fun isWarnEnabled (Ljava/lang/String;)Z
+	public abstract fun trace (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun trace (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun warn (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public abstract fun warn (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class co/touchlab/kermit/Logger$DefaultImpls {
+	public static synthetic fun debug$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun debug$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static synthetic fun error$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun error$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static synthetic fun info$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun info$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static fun isDebugEnabled (Lco/touchlab/kermit/Logger;Ljava/lang/String;)Z
+	public static synthetic fun isDebugEnabled$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static fun isEnabledForLevel (Lco/touchlab/kermit/Logger;Lco/touchlab/kermit/Level;Ljava/lang/String;)Z
+	public static fun isErrorEnabled (Lco/touchlab/kermit/Logger;Ljava/lang/String;)Z
+	public static synthetic fun isErrorEnabled$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static fun isInfoEnabled (Lco/touchlab/kermit/Logger;Ljava/lang/String;)Z
+	public static synthetic fun isInfoEnabled$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static fun isTraceEnabled (Lco/touchlab/kermit/Logger;Ljava/lang/String;)Z
+	public static synthetic fun isTraceEnabled$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static fun isWarnEnabled (Lco/touchlab/kermit/Logger;Ljava/lang/String;)Z
+	public static synthetic fun isWarnEnabled$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static synthetic fun trace$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun trace$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static synthetic fun warn$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static synthetic fun warn$default (Lco/touchlab/kermit/Logger;Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public final class co/touchlab/kermit/LoggerFactory {
+	public static final field INSTANCE Lco/touchlab/kermit/LoggerFactory;
+	public final fun getLogger (Ljava/lang/String;)Lco/touchlab/kermit/Logger;
+	public final fun getLogger (Lkotlin/reflect/KClass;)Lco/touchlab/kermit/Logger;
+	public final fun setLoggingFactoryProvider (Lco/touchlab/kermit/LoggerFactoryProvider;)V
+}
+
+public abstract interface class co/touchlab/kermit/LoggerFactoryProvider {
+	public abstract fun getLogger (Ljava/lang/String;)Lco/touchlab/kermit/Logger;
+}
+

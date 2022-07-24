@@ -10,27 +10,10 @@
 
 package co.touchlab.kermit
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.jvm.Volatile
 
-class LoggerFunctionsTest {
+internal actual val isStrictModel: Boolean = false
 
-    private fun getTestLogWriter(): TestLogWriter {
-        return TestLogWriter(loggable = Severity.Verbose)
-    }
-
-    @Test
-    fun tagsWork(){
-        val testLogWriter = getTestLogWriter()
-        Logger.apply {
-            setMinSeverity(Severity.Verbose)
-            setLogWriters(testLogWriter)
-        }
-
-        Logger.i("AnotherTag") {
-            "Log Info"
-        }
-
-        assertEquals(testLogWriter.logs.first().tag, "AnotherTag")
-    }
+internal actual object ProviderConfig {
+    actual var provider: LoggerFactoryProvider = EmptyLoggerFactoryProvider
 }

@@ -12,7 +12,7 @@
  */
 
 include(":core")
-include(":test")
+//include(":test")
 
 pluginManagement {
     resolutionStrategy {
